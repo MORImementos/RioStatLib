@@ -1,5 +1,3 @@
-import json
-
 '''
 Intended to parse "decoded" files which would be present on a user's computer
 
@@ -539,6 +537,32 @@ def ops(statJson: dict, teamNum: int, rosterNum: int = -1):
 
 # event stats
 # these all probably invlove looping through all the events
+
+# returns the dict of events in a game
+def events(statJson: dict):
+    return statJson['Events'][0]
+
+# returns the number of the last event
+def eventFinal(statJson: dict):
+    eventDict = events(statJson)
+    finalEvent = 0
+    for event in eventDict:
+        eventNum = event["Event Num"]
+        if eventNum > finalEvent:
+            finalEvent = eventNum
+    return finalEvent
+
+# returns a single event specified by it's number
+# if event is less than 0 or greater than the highest event, returns the last event
+def eventByNum(statJson: dict, eventNum: int):
+    eventDict = events(statJson)
+    finalEvent = eventFinal(statJson)
+    if eventNum < 0 or eventNum > finalEvent:
+        eventNum = finalEvent
+    for event in eventDict:
+        if event["Event Num"] == eventNum:
+            return event
+    return {} # empty dict if no matching event found, which should be impossible anyway
 
 
 # manual exception handling stuff
