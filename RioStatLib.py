@@ -19,10 +19,14 @@ How to use:
 		awayTeamSLG = myStats.slg(1)
 		booERA = myStats.era(0, 4) # Boo in this example is the 4th character on the home team
 		
-Roster args:
+Team args:
 - arg == 0 means team0 which is the home team
 - arg == 1 means team1 which is the away team
-- arg == -1 means all characters (if function allows)
+- arg == -1 or no arg provided means both teams (if function allows) (none currently accept this, but it might be added in the future)
+
+Roster args:
+- arg == 0 -> 8 for each of the 9 roster spots
+- arg == -1 or no arg provided means all characters on that team (if function allows)
 '''
 
 
