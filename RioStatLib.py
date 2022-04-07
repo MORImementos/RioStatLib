@@ -14,7 +14,7 @@ How to use:
 	import json
 	with open("path/to/RioStatFile.json", "r") as jsonStr:
 		jsonObj = json.loads(jsonStr)
-		myStats = RioStatLib(jsonObj)
+		myStats = RioStatLib.StatObj(jsonObj)
 		homeTeamOPS = myStats.ops(0)
 		awayTeamSLG = myStats.slg(1)
 		booERA = myStats.era(0, 4) # Boo in this example is the 4th character on the home team
