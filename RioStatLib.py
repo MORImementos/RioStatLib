@@ -6,7 +6,7 @@ How to use:
 - open a Rio stat json file
 - convert from json string to obj using json.loads(jsonStr)
 - create StatObj with your stat json obj using the following:
-	myStats = RioStatLib(jsonObj)
+	myStats = RioStatLib.StatObj(jsonObj)
 - call any of the built in methods to get some stats
 
 - ex:
