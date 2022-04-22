@@ -50,10 +50,7 @@ class StatObj:
     def isRanked(this):
         # tells if a game was a ranked game or not
         rankedStatus = this.statJson["Ranked"]
-        if rankedStatus == 0:
-            return False
-        else:
-            return True
+        return rankedStatus == 1
 
     def stadium(this):
         # returns the stadium that was played on
@@ -731,7 +728,26 @@ class StatObj:
     # - add method for getting every stat from an event dict
     # - add methods that go through each event
 
-'''
+    # manual exception handling stuff
+    def __errorCheck_teamNum(this, teamNum: int):
+        # tells if the teamNum is invalid
+        if teamNum != 0 and teamNum != 1:
+            raise Exception(f'Invalid team arg {teamNum}. Function only accepts team args of 0 (home team) or 1 (away team).')
+
+
+    def __errorCheck_rosterNum(this, rosterNum: int):
+        # tells if rosterNum is invalid. allows -1 arg
+        if rosterNum < -1 or rosterNum > 8:
+            raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
+
+
+    def __errorCheck_rosterNum2(this, rosterNum: int):
+        # tells if rosterNum is invalid. does not allow -1 arg
+        if rosterNum < 0 or rosterNum > 8:
+            raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
+    
+
+    '''
     {
       "Event Num": 0,
       "Inning": 1,
@@ -805,22 +821,4 @@ class StatObj:
         }
       }
     }
-'''
-
-    # manual exception handling stuff
-    def __errorCheck_teamNum(this, teamNum: int):
-        # tells if the teamNum is invalid
-        if teamNum != 0 and teamNum != 1:
-            raise Exception(f'Invalid team arg {teamNum}. Function only accepts team args of 0 (home team) or 1 (away team).')
-
-
-    def __errorCheck_rosterNum(this, rosterNum: int):
-        # tells if rosterNum is invalid. allows -1 arg
-        if rosterNum < -1 or rosterNum > 8:
-            raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
-
-
-    def __errorCheck_rosterNum2(this, rosterNum: int):
-        # tells if rosterNum is invalid. does not allow -1 arg
-        if rosterNum < 0 or rosterNum > 8:
-            raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
+    '''
