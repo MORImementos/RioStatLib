@@ -7,7 +7,7 @@ How to use:
 - convert from json string to obj using json.loads(jsonStr)
 - create StatObj with your stat json obj using the following:
 	myStats = RioStatLib.StatObj(jsonObj)
-- call any of the built in methods to get some stats
+- call any of the built-in methods to get some stats
 
 - ex:
 	import RioStatLib
@@ -18,7 +18,7 @@ How to use:
 		homeTeamOPS = myStats.ops(0)
 		awayTeamSLG = myStats.slg(1)
 		booERA = myStats.era(0, 4) # Boo in this example is the 4th character on the home team
-		
+
 Team args:
 - arg == 0 means team0 which is the home team
 - arg == 1 means team1 which is the away team
@@ -27,6 +27,9 @@ Team args:
 Roster args:
 - arg == 0 -> 8 for each of the 9 roster spots
 - arg == -1 or no arg provided means all characters on that team (if function allows)
+
+# teamNum: 0 == home team, 1 == away team
+# rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
 '''
 
 
@@ -36,30 +39,29 @@ class StatObj:
         this.statJson = statJson
 
 
-    # large info functions
-
-    # returns it in int form
     def gameID(this):
+        # returns it in int form
         return int(this.statJson["GameID"].replace(',', ''), 16)
 
     # should look to convert to unix or some other standard date fmt
     def date(this):
         return this.statJson["Date"]
 
-    # tells if a game was a ranked game or not
     def isRanked(this):
+        # tells if a game was a ranked game or not
         rankedStatus = this.statJson["Ranked"]
         if rankedStatus == 0:
             return False
         else:
             return True
 
-    # reutrns the stadium that was played on
     def stadium(this):
+        # returns the stadium that was played on
         return this.statJson["StadiumID"]
 
-    # returns name of player. teamNum == 0 is home team, teamNum == 1 is away team
     def player(this, teamNum: int):
+        # returns name of player
+        # teamNum: 0 == home team, 1 == away team
         if teamNum == 0:
             return this.statJson["Home Player"]
         elif teamNum == 1:
@@ -67,8 +69,9 @@ class StatObj:
         else:
             this.__errorCheck_teamNum(teamNum)
 
-    # returns final score of said team
     def score(this, teamNum: int):
+        # returns final score of said team
+        # teamNum: 0 == home team, 1 == away team
         if teamNum == 0:
             return this.statJson["Home Score"]
         elif teamNum == 1:
@@ -76,46 +79,46 @@ class StatObj:
         else:
             this.__errorCheck_teamNum(teamNum)
 
-    # returns how many innings were selected for the game
     def inningsTotal(this):
+        # returns how many innings were selected for the game
         return this.statJson["Innings Selected"]
 
-    # returns how many innings were played in the game
     def inningsPlayed(this):
+        # returns how many innings were played in the game
         return this.statJson["Innings Played"]
 
-    # returns if the game ended in a mercy or not
     def isMercy(this):
+        # returns if the game ended in a mercy or not
         if this.inningsTotal() - this.inningsPlayed() >= 1 and not this.wasQuit():
             return True
         else:
             return False
 
-    # returns if the same was quit out early
     def wasQuit(this):
+        # returns if the same was quit out early
         if this.statJson["Quitter Team"] == "":
             return False
         else:
             return True
 
-    # returns the name of the quitter if the game was quit. empty string if no quitter
     def quitter(this):
+        # returns the name of the quitter if the game was quit. empty string if no quitter
         return this.statJson["Quitter Team"]
 
-    # returns average ping of the game
     def ping(this):
+        # returns average ping of the game
         return this.statJson["Average Ping"]
 
-    # returns number of lag spikes in a game
     def lagspikes(this):
+        # returns number of lag spikes in a game
         return this.statJson["Lag Spikes"]
 
-    # returns the full dict of character game stats as shown in the stat file
     def characterGameStats(this):
+        # returns the full dict of character game stats as shown in the stat file
         return this.statJson["Character Game Stats"]
 
-    # returns if the game has any superstar characters in it
     def isSuperstarGame(this):
+        # returns if the game has any superstar characters in it
         isStarred = False
         charStats = this.characterGameStats()
         for character in charStats:
@@ -128,9 +131,11 @@ class StatObj:
     # character stats
     # (this, teamNum: int, rosterNum: int):
 
-    # returns name of specified character
-    # if no roster spot is provided, returns a list of characters on a given team
     def characterName(this, teamNum: int, rosterNum: int = -1):
+        # returns name of specified character
+        # if no roster spot is provided, returns a list of characters on a given team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum(rosterNum)
         if rosterNum == -1:
@@ -141,9 +146,12 @@ class StatObj:
         else:
             return this.statJson["Character Game Stats"][f"Team {teamNum} Roster {rosterNum}"]["CharID"]
 
-    # returns if a character is starred
-    # if no arg, returns if any character on the team is starred
+
     def isStarred(this, teamNum: int, rosterNum: int = -1):
+        # returns if a character is starred
+        # if no arg, returns if any character on the team is starred
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum(rosterNum)
         if rosterNum == -1:
@@ -156,8 +164,10 @@ class StatObj:
             else:
                 return False
 
-    # returns name of chatacter who is the captian
+
     def captain(this, teamNum: int):
+        # returns name of character who is the captain
+        # teamNum: 0 == home team, 1 == away team
         this.__errorCheck_teamNum(teamNum)
         captain = ""
         for character in this.characterGameStats():
@@ -165,9 +175,12 @@ class StatObj:
                 captain = character["CharID"]
         return captain
 
-    # grabs offensive stats of a character as seen in the stat json
-    # if no roster provided, returns a list of all character's offensive stats
+
     def offensiveStats(this, teamNum: int, rosterNum: int = -1):
+        # grabs offensive stats of a character as seen in the stat json
+        # if no roster provided, returns a list of all character's offensive stats
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum(rosterNum)
         if rosterNum == -1:
@@ -178,9 +191,12 @@ class StatObj:
         else:
             return this.statJson["Character Game Stats"][f"Team {teamNum} Roster {rosterNum}"]["Offensive Stats"]
 
-    # grabs defensive stats of a character as seen in the stat json
-    # if no roster provided, returns a list of all character's defensive stats
+
     def defensiveStats(this, teamNum: int, rosterNum: int = -1):
+        # grabs defensive stats of a character as seen in the stat json
+        # if no roster provided, returns a list of all character's defensive stats
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum(rosterNum)
         if rosterNum == -1:
@@ -191,29 +207,39 @@ class StatObj:
         else:
             return this.statJson["Character Game Stats"][f"Team {teamNum} Roster {rosterNum}"]["Defensive Stats"]
 
-    # returns fielding handedness of character
+
     def fieldingHand(this, teamNum: int, rosterNum: int):
+        # returns fielding handedness of character
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum2(rosterNum)
         return this.statJson["Character Game Stats"][f"Team {teamNum} Roster {rosterNum}"]["Fielding Hand"]
 
-    # returns batting handedness of character
+
     def battingHand(this, teamNum: int, rosterNum: int):
+        # returns batting handedness of character
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_teamNum(teamNum)
         this.__errorCheck_rosterNum2(rosterNum)
         return this.statJson["Character Game Stats"][f"Team {teamNum} Roster {rosterNum}"]["Batting Hand"]
 
 
     # defensive stats
-
-    # tells the era of a character
-    # if no character given, returns era of that team
     def era(this, teamNum: int, rosterNum: int = -1):
+        # tells the era of a character
+        # if no character given, returns era of that team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         return 9 * float(this.runsAllowed(teamNum, rosterNum)) / this.inningPitched(teamNum, rosterNum)
 
-    # tells how many batters were faced by character
-    # if no character given, returns batters faced by that team
+
     def battersFaced(this, teamNum: int, rosterNum: int = -1):
+        # tells how many batters were faced by character
+        # if no character given, returns batters faced by that team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -222,9 +248,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Batters Faced"]
 
-    # tells how many runs a character allowed when pitching
-    # if no character given, returns runs allowed by that team
+
     def runsAllowed(this, teamNum: int, rosterNum: int = -1):
+        # tells how many runs a character allowed when pitching
+        # if no character given, returns runs allowed by that team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -233,14 +262,20 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Runs Allowed"]
 
-    # tells how many walks a character allowed when pitching
-    # if no character given, returns walks by that team
+
     def battersWalked(this, teamNum: int, rosterNum: int = -1):
+        # tells how many walks a character allowed when pitching
+        # if no character given, returns walks by that team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         return this.battersWalkedBallFour(teamNum, rosterNum) + this.battersHitByPitch(teamNum, rosterNum)
 
-    # returns how many times a character has walked a batter via 4 balls
-    # if no character given, returns how many times the team walked via 4 balls
+
     def battersWalkedBallFour(this, teamNum: int, rosterNum: int = -1):
+        # returns how many times a character has walked a batter via 4 balls
+        # if no character given, returns how many times the team walked via 4 balls
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -249,9 +284,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Batters Walked"]
 
-    # returns how many times a character walked a batter by hitting them by a pitch
-    # if no character given, returns walked via HBP for the team
+
     def battersHitByPitch(this, teamNum: int, rosterNum: int = -1):
+        # returns how many times a character walked a batter by hitting them by a pitch
+        # if no character given, returns walked via HBP for the team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -260,9 +298,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Batters Hit"]
 
-    # returns how many hits a character allowed as pitcher
-    # if no character given, returns how many hits a team allowed
+
     def hitsAllowed(this, teamNum: int, rosterNum: int = -1):
+        # returns how many hits a character allowed as pitcher
+        # if no character given, returns how many hits a team allowed
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -271,9 +312,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Hits Allowed"]
 
-    # returns how many homeruns a character allowed as pitcher
-    # if no character given, returns how many homeruns a team allowed
+
     def homerunsAllowed(this, teamNum: int, rosterNum: int = -1):
+        # returns how many homeruns a character allowed as pitcher
+        # if no character given, returns how many homeruns a team allowed
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -282,9 +326,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["HRs Allowed"]
 
-    # returns how many pitches a character threw
-    # if no character given, returns how many pitches a team threw
+
     def pitchesThrown(this, teamNum: int, rosterNum: int = -1):
+        # returns how many pitches a character threw
+        # if no character given, returns how many pitches a team threw
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -293,9 +340,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Pitches Thrown"]
 
-    # returns final pitching stamina of a pitcher
-    # if no character given, returns total stamina of a team
+
     def stamina(this, teamNum: int, rosterNum: int = -1):
+        # returns final pitching stamina of a pitcher
+        # if no character given, returns total stamina of a team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -304,17 +354,23 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Stamina"]
 
-    # returns if a character was a pitcher
+
     def wasPitcher(this, teamNum: int, rosterNum: int):
+        # returns if a character was a pitcher
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_rosterNum2(rosterNum)
         if this.defensiveStats(teamNum, rosterNum)["Was Pitcher"] == 1:
             return True
         else:
             return False
 
-    # returns how many strikeouts a character pitched
-    # if no character given, returns how mnany strikeouts a team pitched
+
     def strikeoutsPitched(this, teamNum: int, rosterNum: int = -1):
+        # returns how many strikeouts a character pitched
+        # if no character given, returns how mnany strikeouts a team pitched
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -323,9 +379,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Strikeouts"]
 
-    # returns how many star pitches a charcter threw
-    # if no character given, returns how many star pitches a team threw
+
     def starPitchesThrown(this, teamNum: int, rosterNum: int = -1):
+        # returns how many star pitches a character threw
+        # if no character given, returns how many star pitches a team threw
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -334,9 +393,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Star Pitches Thrown"]
 
-    # returns how many big plays a character had
-    # if no character given, returns how many big plays a team had
+
     def bigPlays(this, teamNum: int, rosterNum: int = -1):
+        # returns how many big plays a character had
+        # if no character given, returns how many big plays a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -345,9 +407,12 @@ class StatObj:
         else:
             return this.defensiveStats(teamNum, rosterNum)["Big Plays"]
 
-    # returns how many outs a charcter was pitching for
-    # if no character given, returns how many outs a team pitched for
+
     def outsPitched(this, teamNum: int, rosterNum: int = -1):
+        # returns how many outs a character was pitching for
+        # if no character given, returns how many outs a team pitched for
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -355,28 +420,40 @@ class StatObj:
             return total
         else:
             return this.defensiveStats(teamNum, rosterNum)["Outs Pitched"]
-	
-    # returns how many innings a charcter was pitching for
-    # if no character given, returns how many innings a team pitched for
+
+
     def inningsPitched(this, teamNum: int, rosterNum: int = -1):
+        # returns how many innings a character was pitching for
+        # if no character given, returns how many innings a team pitched for
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         return float(this.outsPitched(teamNum, rosterNum)) / 3
 
-    # returns a dict which tracks how many pitches a charcter was at a position for
+
     def pitchesPerPosition(this, teamNum: int, rosterNum: int):
+        # returns a dict which tracks how many pitches a character was at a position for
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_rosterNum2(rosterNum)
         return this.defensiveStats(teamNum, rosterNum)["Pitches Per Position"][0]
 
-    # returns a dict which tracks how many outs a charcter was at a position for
+
     def outsPerPosition(this, teamNum: int, rosterNum: int):
+        # returns a dict which tracks how many outs a character was at a position for
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: 0 -> 8 for each of the 9 roster spots
         this.__errorCheck_rosterNum2(rosterNum)
         return this.defensiveStats(teamNum, rosterNum)["Outs Per Position"][0]
 
 
     # offensive stats
 
-    # returns how many at bats a character had
-    # if no character given, returns how many at bats a team had
+
     def atBats(this, teamNum: int, rosterNum: int = -1):
+        # returns how many at bats a character had
+        # if no character given, returns how many at bats a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -385,9 +462,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["At Bats"]
 
-    # returns how many hits a character had
-    # if no character given, returns how many hits a team had
+
     def hits(this, teamNum: int, rosterNum: int = -1):
+        # returns how many hits a character had
+        # if no character given, returns how many hits a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -396,9 +476,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Hits"]
 
-    # returns how many singles a character had
-    # if no character given, returns how many singles a team had
+
     def singles(this, teamNum: int, rosterNum: int = -1):
+        # returns how many singles a character had
+        # if no character given, returns how many singles a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -407,9 +490,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Singles"]
 
-    # returns how many doubles a character had
-    # if no character given, returns how many doubles a team had
+
     def doubles(this, teamNum: int, rosterNum: int = -1):
+        # returns how many doubles a character had
+        # if no character given, returns how many doubles a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -418,9 +504,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Doubles"]
 
-    # returns how many triples a character had
-    # if no character given, returns how many triples a teams had
+
     def triples(this, teamNum: int, rosterNum: int = -1):
+        # returns how many triples a character had
+        # if no character given, returns how many triples a teams had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -429,9 +518,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Triples"]
 
-    # returns how many homeruns a character had
-    # if no character given, returns how many homeruns a team had
+
     def homeruns(this, teamNum: int, rosterNum: int = -1):
+        # returns how many homeruns a character had
+        # if no character given, returns how many homeruns a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -440,9 +532,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Homeruns"]
 
-    # returns how many successful bunts a character had
-    # if no character given, returns how many successful bunts a team had
+
     def buntsLanded(this, teamNum: int, rosterNum: int = -1):
+        # returns how many successful bunts a character had
+        # if no character given, returns how many successful bunts a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -451,9 +546,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Successful Bunts"]
 
-    # returns how many sac flys a character had
-    # if no character given, returns how many sac flys a team had
+
     def sacFlys(this, teamNum: int, rosterNum: int = -1):
+        # returns how many sac flys a character had
+        # if no character given, returns how many sac flys a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -462,9 +560,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Sac Flys"]
 
-    # returns how many times a character struck out when batting
-    # if no character given, returns how many times a team struck out when batting
+
     def strikeouts(this, teamNum: int, rosterNum: int = -1):
+        # returns how many times a character struck out when batting
+        # if no character given, returns how many times a team struck out when batting
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -473,14 +574,20 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Strikeouts"]
 
-    # returns how many times a character was walked when batting
-    # if no character given, returns how many times a team was walked when batting
+
     def walks(this, teamNum: int, rosterNum: int):
+        # returns how many times a character was walked when batting
+        # if no character given, returns how many times a team was walked when batting
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         return this.walksBallFour(teamNum, rosterNum) + this.walksHitByPitch(teamNum, rosterNum)
 
-    # returns how many times a character was walked via 4 balls when batting
-    # if no character given, returns how many times a team was walked via 4 balls when batting
+
     def walksBallFour(this, teamNum: int, rosterNum: int = -1):
+        # returns how many times a character was walked via 4 balls when batting
+        # if no character given, returns how many times a team was walked via 4 balls when batting
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -489,9 +596,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Walks (4 Balls)"]
 
-    # returns how many times a character was walked via hit by pitch when batting
-    # if no character given, returns how many times a team was walked via hit by pitch when batting
+
     def walksHitByPitch(this, teamNum: int, rosterNum:int = -1):
+        # returns how many times a character was walked via hit by pitch when batting
+        # if no character given, returns how many times a team was walked via hit by pitch when batting
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -500,9 +610,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Walks (Hit)"]
 
-    # returns how many RBI's a character had
-    # if no character given, returns how many RBI's a team had
+
     def rbi(this, teamNum: int, rosterNum: int = -1):
+        # returns how many RBI's a character had
+        # if no character given, returns how many RBI's a team had
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -511,9 +624,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["RBI"]
 
-    # returns how many times a character successfully stole a base
-    # if no character given, returns how many times a team successfully stole a base
+
     def basesStolen(this, teamNum: int, rosterNum: int = -1):
+        # returns how many times a character successfully stole a base
+        # if no character given, returns how many times a team successfully stole a base
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -522,9 +638,12 @@ class StatObj:
         else:
             return this.offensiveStats(teamNum, rosterNum)["Bases Stolen"]
 
-    # returns how many star hits a character used
-    # if no character given, returns how many star hits a team used
+
     def starHitsUsed(this, teamNum: int, rosterNum: int = -1):
+        # returns how many star hits a character used
+        # if no character given, returns how many star hits a team used
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         if rosterNum == -1:
             total = 0
             for x in range(0, 9):
@@ -538,25 +657,34 @@ class StatObj:
 
     # complicated stats
 
-    # returns the batting average of a character
-    # if no character given, returns the batting average of a team
+
     def battingAvg(this, teamNum: int, rosterNum: int = -1):
+        # returns the batting average of a character
+        # if no character given, returns the batting average of a team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         nAtBats = this.atBats(teamNum, rosterNum)
         nHits = this.hits(teamNum, rosterNum)
         nWalks = this.walks(teamNum, rosterNum)
         return float(nHits) / float(nAtBats - nWalks)
 
-    # returns the on base percentage of a character
-    # if no character given, returns the on base percentage of a team
+
     def obp(this, teamNum: int, rosterNum: int = -1):
+        # returns the on base percentage of a character
+        # if no character given, returns the on base percentage of a team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         nAtBats = this.atBats(teamNum, rosterNum)
         nHits = this.hits(teamNum, rosterNum)
         nWalks = this.walks(teamNum, rosterNum)
         return float(nHits + nWalks) / float(nAtBats)
 
-    # returns the SLG of a character
-    # if no character given, returns the SLG of a team
+
     def slg(this, teamNum: int, rosterNum: int = -1):
+        # returns the SLG of a character
+        # if no character given, returns the SLG of a team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         nAtBats = this.atBats(teamNum, rosterNum)
         nSingles = this.singles(teamNum, rosterNum)
         nDoubles = this.doubles(teamNum, rosterNum)
@@ -565,55 +693,134 @@ class StatObj:
         nWalks = this.walks(teamNum, rosterNum)
         return float(nSingles + nDoubles*2 + nTriples*3 + nHomeruns*4) / float(nAtBats - nWalks)
 
-    # returns the OPS of a character
-    # if no character given, returns the OPS of a team
+
     def ops(this, teamNum: int, rosterNum: int = -1):
+        # returns the OPS of a character
+        # if no character given, returns the OPS of a team
+        # teamNum: 0 == home team, 1 == away team
+        # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         return this.obp(teamNum, rosterNum) + this.slg(teamNum, rosterNum)
 
 
     # event stats
-    # these all probably invlove looping through all the events
-
-    # returns the dict of events in a game
+    # these all probably involve looping through all the events
     def events(this):
-        return this.statJson['Events'][0]
+        # returns the list of events in a game
+        return this.statJson['Events']
 
-    # returns the number of the last event
+
     def eventFinal(this):
-        eventDict = this.events()
-        finalEvent = 0
-        for event in eventDict:
-            eventNum = event["Event Num"]
-            if eventNum > finalEvent:
-                finalEvent = eventNum
-        return finalEvent
+        # returns the number of the last event
+        eventList = this.events()
+        return eventList[-1]["Event Num"]
 
-    # returns a single event specified by it's number
-    # if event is less than 0 or greater than the highest event, returns the last event
+
     def eventByNum(this, eventNum: int):
-        eventDict = this.events()
+        # returns a single event specified by its number
+        # if event is less than 0 or greater than the highest event, returns the last event
+        eventList = this.events()
         finalEvent = this.eventFinal()
         if eventNum < 0 or eventNum > finalEvent:
-            eventNum = finalEvent
-        for event in eventDict:
+            return finalEvent
+        for event in eventList:
             if event["Event Num"] == eventNum:
                 return event
         return {} # empty dict if no matching event found, which should be impossible anyway
 
+    # TODO:
+    # - add method for getting every stat from an event dict
+    # - add methods that go through each event
+
+'''
+    {
+      "Event Num": 0,
+      "Inning": 1,
+      "Half Inning": 0,
+      "Away Score": 0,
+      "Home Score": 0,
+      "Balls": 0,
+      "Strikes": 0,
+      "Outs": 0,
+      "Star Chance": 0,
+      "Away Stars": 4,
+      "Home Stars": 3,
+      "Chemistry Links on Base": 0,
+      "Pitcher Roster Loc": 2,
+      "Batter Roster Loc": 0,
+      "RBI": 0,
+      "Result of AB": "Out",
+      "Runner Batter": {
+        "Runner Roster Loc": 0,
+        "Runner Char Id": "Paragoomba",
+        "Runner Initial Base": 0,
+        "Out Type": "Tag",
+        "Out Location": 0,
+        "Steal": "None",
+        "Runner Result Base": 255
+      },
+      "Pitch": {
+        "Pitcher Team Id": 0,
+        "Pitcher Char Id": "Mario",
+        "Pitch Type": "Curve",
+        "Charge Type": "N/A",
+        "Star Pitch": 0,
+        "Pitch Speed": 130,
+        "DB": 1,
+        "Pitch Result": "Contact",
+        "Contact": {
+          "Type of Swing": "Bunt",
+          "Type of Contact": "Perfect",
+          "Charge Power Up": 0,
+          "Charge Power Down": 0,
+          "Star Swing Five-Star": 0,
+          "Input Direction": "None",
+          "Frame Of Swing Upon Contact": 0,
+          "Ball Angle": "571",
+          "Ball Vertical Power": "27",
+          "Ball Horizontal Power": "31",
+          "Ball Velocity - X": 0.0991619,
+          "Ball Velocity - Y": 0.00641787,
+          "Ball Velocity - Z": 0.118957,
+          "Ball Landing Position - X": 2.85452,
+          "Ball Landing Position - Y": 0.185372,
+          "Ball Landing Position - Z": 3.82766,
+          "Ball Position Upon Contact - X": -2.3,
+          "Ball Position Upon Contact - Z": -0.6,
+          "Batter Position Upon Contact - X": 0,
+          "Batter Position Upon Contact - Z": 0,
+          "Multi-out": 0,
+          "Contact Result - Primary": "Fair",
+          "Contact Result - Secondary": "foul",
+          "First Fielder": {
+            "Fielder Roster Location": 4,
+            "Fielder Position": "1B",
+            "Fielder Character": "Koopa(G)",
+            "Fielder Action": "Unable to Decode. Invalid Value (247).",
+            "Fielder Swap": 188,
+            "Fielder Position - X": 7.9392,
+            "Fielder Position - Y": 9.73028,
+            "Fielder Position - Z": -0,
+            "Fielder Bobble": "None"
+          }
+        }
+      }
+    }
+'''
 
     # manual exception handling stuff
-
-    # tells if the teamNum is invalid
     def __errorCheck_teamNum(this, teamNum: int):
+        # tells if the teamNum is invalid
         if teamNum != 0 and teamNum != 1:
             raise Exception(f'Invalid team arg {teamNum}. Function only accepts team args of 0 (home team) or 1 (away team).')
 
-    # tells if rosterNum is invalid. allows -1 arg
+
     def __errorCheck_rosterNum(this, rosterNum: int):
+        # tells if rosterNum is invalid. allows -1 arg
         if rosterNum < -1 or rosterNum > 8:
             raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
 
-    # tells if rosterNum is invalid. does not allow -1 arg
+
     def __errorCheck_rosterNum2(this, rosterNum: int):
+        # tells if rosterNum is invalid. does not allow -1 arg
         if rosterNum < 0 or rosterNum > 8:
             raise Exception(f'Invalid roster arg {rosterNum}. Function only accepts roster args of from 0 to 8.')
