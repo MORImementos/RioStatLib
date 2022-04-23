@@ -13,7 +13,7 @@ How to use:
 	import RioStatLib
 	import json
 	with open("path/to/RioStatFile.json", "r") as jsonStr:
-		jsonObj = json.loads(jsonStr)
+		jsonObj = json.load(jsonStr)
 		myStats = RioStatLib.StatObj(jsonObj)
 		homeTeamOPS = myStats.ops(0)
 		awayTeamSLG = myStats.slg(1)
