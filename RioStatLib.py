@@ -284,7 +284,7 @@ class StatObj:
         # For Project Rio versions 1.9.2 and later
         # teamNum: 0 == away team, 1 == home team
         # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
-        return 9 * float(this.runsAllowed(teamNum, rosterNum)) / this.inningPitched(teamNum, rosterNum)
+        return 9 * float(this.runsAllowed(teamNum, rosterNum)) / this.inningsPitched(teamNum, rosterNum)
 
     def battersFaced(this, teamNum: int, rosterNum: int = -1):
         # tells how many batters were faced by character
