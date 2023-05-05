@@ -779,8 +779,7 @@ class StatObj:
         # rosterNum: optional (no arg == all characters on team), 0 -> 8 for each of the 9 roster spots
         nAtBats = this.atBats(teamNum, rosterNum)
         nHits = this.hits(teamNum, rosterNum)
-        nWalks = this.walks(teamNum, rosterNum)
-        return float(nHits) / float(nAtBats - nWalks)
+        return float(nHits) / float(nAtBats)
 
     def obp(this, teamNum: int, rosterNum: int = -1):
         # returns the on base percentage of a character
